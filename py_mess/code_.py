@@ -1845,3 +1845,74 @@ for i in s_i:
 
 
 ===
+
+### linear, m_0 (+) m_1 => m_big_dim
+
+import tensorflow as tf 
+
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Input, Activation, Dense, Permute, Dropout
+from tensorflow.keras.layers import add, dot, concatenate
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.utils import get_file
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import plot_model
+
+from functools import reduce
+import tarfile
+import numpy as np
+import re
+import os
+from sklearn.model_selection import train_test_split
+
+from IPython.display import display
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# x0,y0,  x1,y1 = train_test_split(x,y,test_size=0.2)
+
+### main_
+id_a_np = np.random.random([1,2,2])
+id_b_np = np.random.random([1,1,2])
+
+id_a_np[0,0,0] = 1.0
+id_a_np[0,0,1] = 0.1
+id_a_np[0,1,0] = 2.0
+id_a_np[0,1,1] = 0.2
+
+
+id_b_np[0,0,0] = -3
+id_b_np[0,0,1] = -7
+
+id_a = Input(id_a_np.shape[1:])
+id_b = Input(id_b_np.shape[1:])
+
+
+
+id_ans = dot([id_a, id_b], axes=[2,2])
+
+model = Model([id_a, id_b], id_ans)
+
+model.summary()
+model.compile(loss='mse', optimizer='adam')
+
+
+print(id_a_np)
+print()
+print(id_b_np)
+
+
+id_predict =  model.predict([id_a_np, id_b_np])
+# model.predict([np.random.random(2,3) , np.random.random(4,3)] )
+
+id_predict.shape
+
+print()
+print(id_predict)
+
+
+
+
+===
+
