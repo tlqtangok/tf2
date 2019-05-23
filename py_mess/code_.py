@@ -1678,7 +1678,6 @@ model.fit([inputs_train, queries_train], answers_train,
 
 ===
 
-
 ### linear, m_0 (+) m_1 => m_big_dim
 
 import tensorflow as tf 
@@ -1698,6 +1697,11 @@ import numpy as np
 import re
 import os
 from sklearn.model_selection import train_test_split
+
+from IPython.display import display
+from PIL import Image
+import matplotlib.pyplot as plt
+
 # x0,y0,  x1,y1 = train_test_split(x,y,test_size=0.2)
 
 
@@ -1716,14 +1720,15 @@ def plot_history(histories, key='binary_crossentropy'):
 
 def get_model(i_0, i_1):
     m_0 = Sequential([
-    Dense(id_label_all.shape[-1]*2, activation='linear', input_shape= i_0.shape[1:]),
+    Dense(id_label_all.shape[-1]*2, activation='linear', input_shape= i_0.shape[1:])
+        
 #         Dense(id_label_all.shape[-1]*2,  activation='relu')
         ])
 
 
     m_1 = Sequential([
         Dense(id_label_all.shape[-1]*3,  activation='linear', input_shape= i_1.shape[1:]),
-        Dense(id_label_all.shape[-1]*2, activation='relu'), 
+        Dense(id_label_all.shape[-1]*2, activation='linear'), 
         ])
 
     id_ans = response = add([m_0(i_0),m_1(i_1)])  # must use add( ), if not , show error on model save
@@ -1734,14 +1739,14 @@ def get_model(i_0, i_1):
     
     model =  Model([i_0, i_1], id_ans)
     
-    plot_model(m_0,  to_file='m_0.png',show_shapes=True)
-    !./tfr t m_0.png
+#     plot_model(m_0,  to_file='m_0.png',show_shapes=True)
+#     !./tfr t m_0.png
 
-    plot_model(m_1,  to_file='m_1.png',show_shapes=True)
-    !./tfr t m_1.png
+#     plot_model(m_1,  to_file='m_1.png',show_shapes=True)
+#     !./tfr t m_1.png
     
-    plot_model(model,  to_file='model.png',show_shapes=True)
-    !./tfr t model.png
+#     plot_model(model,  to_file='model.png',show_shapes=True)
+#     !./tfr t model.png
     
     return model
     # x_train_0 (+) x_train_1 => x_label
@@ -1754,7 +1759,7 @@ def get_model(i_0, i_1):
 flag_train = 1
 ###
 
-x_items = 20000
+x_items = 80000
 if not flag_train:
     x_items = int(x_items/100.0)
 
@@ -1801,9 +1806,9 @@ if flag_train:
         x_label,
 
         validation_data=([y_test_0,y_test_1], y_label),
-        epochs=32,
-        batch_size=256,
-        verbose=1
+        epochs=40,
+        batch_size=512,
+        verbose=0
     )
 
 
@@ -1836,7 +1841,6 @@ for i in s_i:
     print()
     
 ## jd end define model
-
 
 
 
