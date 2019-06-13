@@ -1915,7 +1915,6 @@ print(id_predict)
 
 
 ===
-
 ### a really simple example to use libcudnn and plot loss via id_pd.plot.scatter
 
 import tensorflow as tf 
@@ -1939,18 +1938,22 @@ from sklearn.model_selection import train_test_split
 
 from IPython.display import display
 from PIL import Image
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+
+from tensorflow.keras import backend as K
 
 
 
-x_train_all =  np.random.random([10, 28,28,1])
-y_label_all =  np.random.random([10, 26,26,1])
+
+id_shape = [10000, 28,28,1]
+x_train_all =  np.random.random(id_shape)
+y_label_all =  x_train_all * 3.3 + 4.4
 
 x_train, y_test, x_label, y_label = train_test_split(x_train_all, y_label_all, test_size=0.2)
 
 model = Sequential(
 [
-    Conv2D(4, (3,3), activation="relu", input_shape=x_train.shape[1:]), 
+    Conv2D(4, (3,3), padding="same", activation="relu", input_shape=x_train.shape[1:]), 
     Dense(1)
 ]
 )
@@ -1962,9 +1965,9 @@ model.compile(loss='mse', optimizer='adam')
 history = model.fit(
     x_train, x_label, 
     validation_data=(y_test, y_label),
-    epochs=32,
-    batch_size=10,
-    verbose=0
+    epochs=512,
+    batch_size=1024,
+    verbose=1
 )
 
 id_pd = pd.DataFrame(history.history)
@@ -1974,7 +1977,109 @@ id_pd["idx"] = np.arange(len(id_pd))
 
 # display(id_pd)
 
-id_pd.plot.scatter(x=["idx"] * 2,y=["loss", "val_loss"], c=["blue", "red"])
-plt.show()
+#id_pd.plot.scatter(x=["idx"] * 2,y=["loss", "val_loss"], c=["blue", "red"])
+#plt.show()
 
+#K.clear_session()
 === 
+### LSTM ### 
+### for ding to use 
+import tensorflow as tf 
+
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Input, Activation, Dense, Permute, Dropout, Conv2D, Flatten, Reshape
+from tensorflow.keras.layers import add, dot, concatenate
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.utils import get_file
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras.datasets import mnist
+
+from functools import reduce
+import tarfile
+import numpy as np
+import pandas as pd
+import re
+import os
+from sklearn.model_selection import train_test_split
+
+from IPython.display import display
+from PIL import Image
+import matplotlib.pyplot as plt
+
+from tensorflow.keras import backend as K
+
+import pandas as pd
+import scipy.stats
+
+import math
+from collections import Counter
+
+
+from scipy import stats
+import pandas as pd
+
+from pprint import pprint
+
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.utils import plot_model
+
+
+learning_rate = 0.001
+training_iters = 20
+batch_size = 1024
+display_step = 10
+ 
+n_input = 28
+n_step = 28
+n_hidden = 128
+n_classes = 10
+ 
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+ 
+x_train = x_train.reshape(-1, n_step, n_input)
+
+pprint(x_train.shape)
+
+x_test = x_test.reshape(-1, n_step, n_input)
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+x_train /= 255
+x_test /= 255
+ 
+y_train = tf.keras.utils.to_categorical(y_train, n_classes)
+y_test = tf.keras.utils.to_categorical(y_test, n_classes)
+ 
+model = Sequential()
+model.add(LSTM(n_hidden,
+#                batch_input_shape=(None, n_step, n_input),
+               input_shape=x_train.shape[1:],
+               unroll=True))
+ 
+model.add(Dense(n_classes))
+model.add(Activation('softmax'))
+ 
+adam = Adam(lr=learning_rate)
+
+model.compile(optimizer=adam,
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+model.summary() 
+
+plot_model(model,  to_file='model.png',show_shapes=True)
+# !./tfr t model.png 
+
+
+model.fit(x_train, y_train,
+          batch_size=batch_size,
+          epochs=training_iters,
+          verbose=1,
+          validation_data=(x_test, y_test))
+ 
+scores = model.evaluate(x_test, y_test, verbose=0)
+print('LSTM test score:', scores[0])
+print('LSTM test accuracy:', scores[1])
+
+
+
