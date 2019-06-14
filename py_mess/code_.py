@@ -2083,3 +2083,103 @@ print('LSTM test accuracy:', scores[1])
 
 
 
+### classify to 00 01 10 11 ###
+### for ding to use 
+import tensorflow as tf 
+
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Input, Activation, Dense, Permute, Dropout, Conv2D, Flatten, Reshape
+from tensorflow.keras.layers import Conv1D
+
+from tensorflow.keras.layers import add, dot, concatenate
+from tensorflow.keras.layers import LSTM,RNN
+from tensorflow.keras.utils import get_file
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras.datasets import mnist
+
+from functools import reduce
+import tarfile
+import numpy as np
+import pandas as pd
+import re
+import os
+from sklearn.model_selection import train_test_split
+
+from IPython.display import display
+from PIL import Image
+import matplotlib.pyplot as plt
+
+from tensorflow.keras import backend as K
+
+import pandas as pd
+import scipy.stats
+
+import math
+from collections import Counter
+
+
+from scipy import stats
+import pandas as pd
+
+from pprint import pprint
+
+from tensorflow.keras.optimizers import Adam
+
+x_item = 10000
+x_dim = 3
+y_dim = 2
+
+x_train_all = np.random.random([x_item, x_dim])
+x_label_all = np.random.random([x_item, y_dim])
+
+for idx, e in enumerate(x_train_all):
+    e_sum = e[0] + e[1]
+    if (e_sum > 1.7):
+        x_label_all[idx][0] = 0
+        x_label_all[idx][-1] = 0
+    elif (e_sum > 1.1):
+        x_label_all[idx][0] = 0
+        x_label_all[idx][-1] = 1
+    elif (e_sum > 0.6):
+        x_label_all[idx][0] = 1
+        x_label_all[idx][-1] = 0
+    else:
+        x_label_all[idx][0] = 1
+        x_label_all[idx][-1] = 1        
+
+x_train, y_test, x_label, y_label = train_test_split(x_train_all, x_label_all, test_size=0.1)
+
+
+
+
+model = Sequential(
+[
+   Dense(128, input_shape=x_train.shape[1:]),
+    Dropout(0.224),
+    Dense(32 ),
+    Dense(y_dim, activation='softmax')
+    
+]
+)
+model.compile(loss='mse',optimizer=Adam(), metrics=['acc'])
+
+model.summary()
+
+model.fit(
+x_train, x_label,
+    
+    validation_data=(y_test, y_label),
+    batch_size=1024,
+    epochs=15
+)
+
+
+y_p = model.predict(y_test[0:11])
+
+print(y_p)
+print()
+print(y_label[:11])
+
+
