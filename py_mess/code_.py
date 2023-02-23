@@ -1,3 +1,63 @@
+import tensorflow as tf 
+mnist = tf.keras.datasets.mnist
+
+from IPython.display import display
+import matplotlib.pyplot as plt
+import pandas as pd 
+
+
+
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train, x_test = x_train / 255.0, x_test / 255.0
+print(x_train.shape)
+
+
+model = tf.keras.models.Sequential([
+  tf.keras.layers.Flatten(input_shape=(28, 28)),
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dropout(0.2),
+  tf.keras.layers.Dense(10),
+#   tf.keras.layers.Softmax(),
+])
+
+
+
+loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+loss_val = loss_fn(y_train[:1], predictions).numpy()
+print(loss_val)
+
+model.compile(optimizer='adam',
+              loss=loss_fn,
+              metrics=['accuracy'])
+
+model.fit(x_train, y_train, epochs=3)
+
+print(y_test.shape)
+model.evaluate(x_test,  y_test, verbose=2)
+
+# assert(0==1)
+
+# probability_model = tf.keras.Sequential([
+#   model,
+#   tf.keras.layers.Softmax()
+# ])
+
+# y1 = probability_model(x_test[:1])
+
+y2_ = model(x_test[:3])
+y2 = y_test[:3]
+
+print(y2)
+
+print(tf.argmax(y2_, 1).numpy())
+
+pd.DataFrame(tf.nn.softmax(y2_).numpy() + 1).plot.bar()
+plt.show()
+
+-----------------------------------
+
+
+
 %%time
 # jd add
 
