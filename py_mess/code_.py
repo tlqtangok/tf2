@@ -1,3 +1,133 @@
+
+text recoginization:
+  
+  import tensorflow as tf
+from tensorflow import keras
+
+import numpy as np
+tf.__version__
+imdb = keras.datasets.imdb
+
+
+
+def decode_comment(train_data_num_list):
+    str_all = []
+    for i in train_data_num_list:
+        if i in word_index_rev:
+            t = word_index_rev.get(i, "?")
+            str_all.append(t)
+    str_all_ = " ".join(str_all)
+    return str_all_
+            
+
+(train_data, train_labels), (test_data, test_labels) = imdb.load_data(num_words=10000)
+
+
+
+train_data.shape
+
+len(train_data[0]), len(train_data[1])
+word_index = imdb.get_word_index()
+
+word_index_rev_ = {(v+3,k) for (k,v) in word_index.items() }
+
+
+
+word_index_rev = {}
+for e in word_index_rev_ :
+#     print(e[0])
+    word_index_rev[e[0]] = e[1]
+    
+
+word_index_rev[0] = "<PAD>"
+word_index_rev[1] = "<START>"
+word_index_rev[2] = "<UNK>"  # unknown
+word_index_rev[3] = "<UNUSED>"
+
+
+
+decode_comment(train_data[0])
+
+train_data = keras.preprocessing.sequence.pad_sequences(train_data,
+                                                        value=0,
+                                                        padding='post',
+                                                        maxlen=256)
+
+test_data = keras.preprocessing.sequence.pad_sequences(test_data,
+                                                       value=0,
+                                                       padding='post',
+                                                       maxlen=256)
+decode_comment(train_data[0])
+
+# 输入形状是用于电影评论的词汇数目（10,000 词）
+vocab_size = 10000
+
+model = keras.Sequential()
+model.add(keras.layers.Embedding(vocab_size, 16))
+model.add(keras.layers.GlobalAveragePooling1D())
+model.add(keras.layers.Dense(16, activation='relu'))
+model.add(keras.layers.Dense(1, activation='sigmoid'))
+
+model.summary()
+
+model.compile(optimizer='adam',
+              loss='binary_crossentropy',
+              metrics=['accuracy'])
+
+
+x_val = train_data[:10000]
+partial_x_train = train_data[10000:]
+
+y_val = train_labels[:10000]
+partial_y_train = train_labels[10000:]
+
+
+history = model.fit(partial_x_train,
+                    partial_y_train,
+                    epochs=20,
+                    batch_size=512,
+                    validation_data=(x_val, y_val),
+                    verbose=1)
+
+results = model.evaluate(test_data,  test_labels, verbose=2)
+
+print(results)
+
+history_dict = history.history
+history_dict.keys()
+
+import matplotlib.pyplot as plt
+
+acc = history_dict['accuracy']
+val_acc = history_dict['val_accuracy']
+loss = history_dict['loss']
+val_loss = history_dict['val_loss']
+
+epochs = range(1, len(acc) + 1)
+
+# “bo”代表 "蓝点"
+plt.plot(epochs, loss, 'bo', label='Training loss')
+# b代表“蓝色实线”
+plt.plot(epochs, val_loss, 'b', label='Validation loss')
+
+plt.plot(epochs, acc, 'ro', label='accuracy')
+plt.plot(epochs, val_acc, 'r', label='val_accuracy')
+
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.show()
+
+
+
+
+
+
+-------------------------------
+
+
 import tensorflow as tf 
 mnist = tf.keras.datasets.mnist
 
