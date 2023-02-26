@@ -1,3 +1,152 @@
+text emotion classify with tf dataset api 
+===
+import os
+import numpy as np
+
+import tensorflow as tf
+import tensorflow_hub as hub
+import tensorflow_datasets as tfds
+
+print("Version: ", tf.__version__)
+print("Eager mode: ", tf.executing_eagerly())
+print("Hub version: ", hub.__version__)
+print("GPU is", "available" if tf.config.list_physical_devices("GPU") else "NOT AVAILABLE")
+
+
+# train_data, validation_data, test_data = tfds.load(
+#     name="imdb_reviews", 
+#     split=('train[:60%]', 'train[60%:]', 'test'),
+#     as_supervised=True)
+
+# print("start......")
+
+# train_data[10]
+# x = tfds.load(name='imdb_reviews', data_dir="/home/chengwei/jd/t/imdb_reviews/plain_text/1.0.0", download=False)
+
+
+print("_ start")
+# train, validation_train, test, info = tfds.load(name="imdb_reviews",
+#                                data_dir="/home/chengwei/jd/t",
+#                                                split=["train[:80%]", "train[80%:]", "test"],
+#                      as_supervised=True,
+#                                download=False, with_info=True)
+
+# train_data, validation_data, test_data = tfds.load(
+#     name="imdb_reviews", 
+#      data_dir="/home/chengwei/jd/t",
+#     split=('train[:60%]', 'train[60%:]', 'test'),
+#     batch_size=-1,
+#     as_supervised=True)
+
+# ds, info = tfds.load(name="imdb_reviews", data_dir="/home/chengwei/jd/t", with_info=True) 
+ds = tfds.load(name="imdb_reviews", data_dir="/home/chengwei/jd/t", as_supervised=True, with_info=False) 
+# print(ds.items())
+# tfds.as_dataframe(ds["train"].take(3), info)
+
+# info
+
+# embedding = "https://tfhub.dev/google/nnlm-en-dim50/2"
+embedding = "/home/chengwei/jd/t/nnlm_model"  #/home/chengwei/jd/t/nnlm_model/saved_model.pb
+hub_layer = hub.KerasLayer(embedding, input_shape=[], 
+                           dtype=tf.string, trainable=True)
+
+
+
+
+ds_x_train, ds_y_train = next(iter(ds["train"].batch(5)))  # <tf.Tensor: shape=(5,), dtype=int64, numpy=array([0, 0, 0, 1, 1])>
+
+
+
+# ds_train_text = ds_b["text"]
+# ds_train_label = ds_b["label"]
+
+
+
+# print(ds_train_text[:1])
+
+# # ds_train_text[:1]
+
+# hub_layer(["my name", "google"])  # dim (1,50)
+
+hub_layer(ds_x_train[:3])
+
+
+model = tf.keras.Sequential()
+model.add(hub_layer)
+model.add(tf.keras.layers.Dense(16, activation='relu'))
+model.add(tf.keras.layers.Dense(1))
+
+model.summary()
+
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+
+
+
+history = model.fit(ds["train"].shuffle(10000).batch(1024),
+                    epochs=3,
+                    validation_data=ds["test"].batch(1024),
+                    verbose=1)
+
+
+
+results = model.evaluate(ds["test"].batch(512), verbose=2)
+
+# for name, value in zip(model.metrics_names, results):
+#   print("%s: %.3f" % (name, value))
+
+
+# results = model.evaluate(ds["test"].batch(512), verbose=2)
+
+for name, value in zip(model.metrics_names, results):
+  print("%s: %.3f" % (name, value))
+
+ds["train"].batch(10)
+
+
+
+ds["train"]
+
+# # train_example = next(iter(ds["train"].batch(10)))
+# # train_example.items()
+
+
+---output 
+
+Version:  2.11.0
+Eager mode:  True
+Hub version:  0.12.0
+GPU is NOT AVAILABLE
+_ start
+Model: "sequential_3"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ keras_layer_12 (KerasLayer)  (None, 50)               48190600  
+                                                                 
+ dense_6 (Dense)             (None, 16)                816       
+                                                                 
+ dense_7 (Dense)             (None, 1)                 17        
+                                                                 
+=================================================================
+Total params: 48,191,433
+Trainable params: 48,191,433
+Non-trainable params: 0
+_________________________________________________________________
+Epoch 1/3
+25/25 [==============================] - 10s 355ms/step - loss: 0.6183 - accuracy: 0.6052 - val_loss: 0.5701 - val_accuracy: 0.6660
+Epoch 2/3
+25/25 [==============================] - 9s 346ms/step - loss: 0.4950 - accuracy: 0.7445 - val_loss: 0.4689 - val_accuracy: 0.7583
+Epoch 3/3
+25/25 [==============================] - 9s 349ms/step - loss: 0.3788 - accuracy: 0.8376 - val_loss: 0.3870 - val_accuracy: 0.8254
+49/49 - 4s - loss: 0.3870 - accuracy: 0.8254 - 4s/epoch - 92ms/step
+loss: 0.387
+accuracy: 0.825
+<PrefetchDataset element_spec=(TensorSpec(shape=(), dtype=tf.string, name=None), TensorSpec(shape=(), dtype=tf.int64, name=None))>
+===
+
 
 text recoginization:
   
