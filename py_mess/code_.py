@@ -21,12 +21,12 @@ print("GPU is", "available" if tf.config.list_physical_devices("GPU") else "NOT 
 # print("start......")
 
 # train_data[10]
-# x = tfds.load(name='imdb_reviews', data_dir="/home/chengwei/jd/t/imdb_reviews/plain_text/1.0.0", download=False)
+# x = tfds.load(name='imdb_reviews', data_dir="/home/chengw/jd/t/imdb_reviews/plain_text/1.0.0", download=False)
 
 
 print("_ start")
 # train, validation_train, test, info = tfds.load(name="imdb_reviews",
-#                                data_dir="/home/chengwei/jd/t",
+#                                data_dir="/home/chengw/jd/t",
 #                                                split=["train[:80%]", "train[80%:]", "test"],
 #                      as_supervised=True,
 #                                download=False, with_info=True)
@@ -38,7 +38,7 @@ print("_ start")
 #     batch_size=-1,
 #     as_supervised=True)
 
-# ds, info = tfds.load(name="imdb_reviews", data_dir="/home/chengwei/jd/t", with_info=True) 
+# ds, info = tfds.load(name="imdb_reviews", data_dir="/home/chengw/jd/t", with_info=True)   # ./t/imdb_reviews 
 ds = tfds.load(name="imdb_reviews", data_dir="/home/chengwei/jd/t", as_supervised=True, with_info=False) 
 # print(ds.items())
 # tfds.as_dataframe(ds["train"].take(3), info)
