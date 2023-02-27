@@ -1,3 +1,4 @@
+id_pd_train.to_numpy() 
 tf.one_hot([1,3], 4)  # [0,1,0, 0], [0,0,0,1]]
 
 
