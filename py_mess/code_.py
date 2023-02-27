@@ -1,3 +1,96 @@
+=== a regression and classify issue ===
+import os
+import numpy as np
+
+import tensorflow as tf
+import tensorflow_hub as hub
+import tensorflow_datasets as tfds
+import pandas as pd
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+
+
+
+flag_use_regression = 1  # 1 for reg; 0 for classify
+x_item = 30000
+x_dim = 3
+y_dim = 4
+
+x_train_all = np.random.random([x_item, x_dim])
+x_label_all = np.random.random([x_item, y_dim])
+
+
+
+
+print("- use regression is : " , flag_use_regression)
+
+if flag_use_regression:
+    x_train_all  =  np.linspace(0,1000, x_item*x_dim)
+    np.random.shuffle(x_train_all)
+    x_train_all = x_train_all.reshape(x_item, x_dim)
+if not flag_use_regression:
+    x_label_all = np.zeros([x_item, y_dim]).astype('float32')
+    
+for idx, e in enumerate(x_train_all):
+    e_sum = e[0] + e[1]
+    x_label_all[idx][0] = e_sum
+    if not flag_use_regression:   # if 1, classify;  else : regression
+        x_label_all[idx][0] = 0
+        if (e_sum > 1.7):
+            x_label_all[idx][0] = 1
+        elif (e_sum > 1.1):
+            x_label_all[idx][1] = 1
+        elif (e_sum > 0.6):
+            x_label_all[idx][2] = 1
+        else:
+            x_label_all[idx][3] = 1   
+
+      
+
+x_train, y_test, x_label, y_label = train_test_split(x_train_all, x_label_all, test_size=0.1)
+model = tf.keras.models.Sequential(
+[
+   tf.keras.layers.Dense(32, input_shape=x_train.shape[1:], activation="relu"),
+    tf.keras.layers.Dropout(0.224),
+    tf.keras.layers.Dense(32),
+    tf.keras.layers.Dense(y_dim, activation="relu")   # if regression , only relu
+    
+]
+)
+model.compile(loss='mse',optimizer='adam', metrics=['acc'])
+model.summary()
+
+key_acc = "acc"
+early_stop = tf.keras.callbacks.EarlyStopping(monitor="" + key_acc,  patience=67)
+model.fit(
+x_train, x_label,
+    
+    validation_data=(y_test, y_label),
+    batch_size=1024,
+    epochs=15, callbacks=[early_stop]
+)
+
+
+display(x_train[:3])
+display(x_label[:3])
+
+y_p = model.predict(y_test[:10])
+
+print(y_p)
+
+
+
+if flag_use_regression:
+    for x, y in zip(y_label[:10], y_p):
+        print (int(x[0]), " ===> ", int(y[0]))
+        
+if not flag_use_regression:
+    for x, y in zip(y_label[:10], y_p):
+        print (x, " ===> ", np.round(y,2))
+===
+
+
+
 id_pd_train.to_numpy() 
 tf.one_hot([1,3], 4)  # [0,1,0, 0], [0,0,0,1]]
 
