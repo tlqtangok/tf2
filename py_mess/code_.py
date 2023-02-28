@@ -67,12 +67,15 @@ x_train, y_test, x_label, y_label = train_test_split(x_train_all, x_label_all, t
 # normalizer.adapt(x_train)
 model = tf.keras.models.Sequential(
 [
-   tf.keras.layers.Dense(32, input_shape=x_train.shape[1:], activation="relu"),
-    tf.keras.layers.Dropout(0.33),
+    tf.keras.Input(shape=x_train.shape[1:]),
+    tf.keras.layers.Dense(32,  activation="relu"),
+    tf.keras.layers.Dropout(0.23),
     tf.keras.layers.Dense(16),
+    tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(y_dim, activation="relu")   # if regression , only relu
 ]
 )
+
 # model.compile(loss='mse' ,optimizer='adam', metrics=['acc'])
 
 model.compile(loss='mse' ,optimizer='adam', metrics=['acc'])
