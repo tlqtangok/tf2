@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 
 
 flag_use_regression = 1  # 1 for reg; 0 for classify
-x_item = 30000
+x_item = 10000
 x_dim = 3
 y_dim = 4
 
@@ -28,12 +28,25 @@ if flag_use_regression:
     x_train_all  =  np.linspace(0,1000, x_item*x_dim)
     np.random.shuffle(x_train_all)
     x_train_all = x_train_all.reshape(x_item, x_dim)
+    
+    x_label_all  =  np.linspace(0,1000, x_item*y_dim)
+    np.random.shuffle(x_label_all)
+    x_label_all = x_label_all.reshape(x_item, y_dim)    
+    
+    
+ 
+
+
+
+    
 if not flag_use_regression:
     x_label_all = np.zeros([x_item, y_dim]).astype('float32')
     
 for idx, e in enumerate(x_train_all):
-    e_sum = e[0] + e[1]
+    e_sum = e[0] + e[-1]
+    x_label_all[idx][0:] = 0
     x_label_all[idx][0] = e_sum
+    
     if not flag_use_regression:   # if 1, classify;  else : regression
         x_label_all[idx][0] = 0
         if (e_sum > 1.7):
@@ -48,45 +61,53 @@ for idx, e in enumerate(x_train_all):
       
 
 x_train, y_test, x_label, y_label = train_test_split(x_train_all, x_label_all, test_size=0.1)
+
+# normalizer_x_train = tf.keras.layers.Normalization(input_shape=x_train.shape[1:], axis=-1)
+
+# normalizer.adapt(x_train)
 model = tf.keras.models.Sequential(
 [
    tf.keras.layers.Dense(32, input_shape=x_train.shape[1:], activation="relu"),
-    tf.keras.layers.Dropout(0.224),
-    tf.keras.layers.Dense(32),
+    tf.keras.layers.Dropout(0.33),
+    tf.keras.layers.Dense(16),
     tf.keras.layers.Dense(y_dim, activation="relu")   # if regression , only relu
-    
 ]
 )
-model.compile(loss='mse',optimizer='adam', metrics=['acc'])
+# model.compile(loss='mse' ,optimizer='adam', metrics=['acc'])
+
+model.compile(loss='mse' ,optimizer='adam', metrics=['acc'])
 model.summary()
 
 key_acc = "acc"
-early_stop = tf.keras.callbacks.EarlyStopping(monitor="" + key_acc,  patience=67)
+early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_" + key_acc,  patience=13)
 model.fit(
-x_train, x_label,
-    
+    x_train, x_label,
     validation_data=(y_test, y_label),
-    batch_size=1024,
-    epochs=15, callbacks=[early_stop]
+    batch_size=2048,
+    epochs=55, 
+    callbacks=[early_stop], 
+    verbose=1
 )
 
 
-display(x_train[:3])
-display(x_label[:3])
+display(np.round(x_train[:3],2))
+display(np.round(x_label[:3],2))
+
 
 y_p = model.predict(y_test[:10])
 
-print(y_p)
+
 
 
 
 if flag_use_regression:
     for x, y in zip(y_label[:10], y_p):
-        print (int(x[0]), " ===> ", int(y[0]))
+        print (np.round(x,2), " ===> ", np.round(y,2))
         
 if not flag_use_regression:
     for x, y in zip(y_label[:10], y_p):
         print (x, " ===> ", np.round(y,2))
+
 ===
 
 
