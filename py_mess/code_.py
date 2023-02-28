@@ -1,3 +1,6 @@
+tf.convert_to_tensor(id_mat)        # from numpy to tf tensor Tensor<>
+
+
 === a regression and classify issue ===
 import os
 import numpy as np
