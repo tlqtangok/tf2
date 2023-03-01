@@ -1,5 +1,5 @@
 tf.convert_to_tensor(id_mat)        # from numpy to tf tensor Tensor<>
-
+train_dataset = tf.data.Dataset.from_tensor_slices((train_examples, train_labels))
 
 === a regression and classify issue ===
 import os
